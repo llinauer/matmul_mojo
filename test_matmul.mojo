@@ -3,8 +3,8 @@ from matmul import matmul_v1, init_random_matrix, init_unit_matrix
 
 fn test_matmul_v1(n: Int) raises:
     
-    var A: List[List[Float64]] = init_random_matrix(n, n)
-    var B: List[List[Float64]] = init_unit_matrix(n)
+    var A: List[List[Float32]] = init_random_matrix(n, n)
+    var B: List[List[Float32]] = init_unit_matrix(n)
     C = matmul_v1(A, B)
 
     for i in range(n):
