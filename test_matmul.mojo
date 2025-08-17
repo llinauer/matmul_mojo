@@ -1,5 +1,5 @@
 from matmul import matmul_v1, init_random_matrix, init_unit_matrix
-
+from matrix import Matrix
 
 fn test_matmul_v1(n: Int) raises:
     
@@ -14,6 +14,16 @@ fn test_matmul_v1(n: Int) raises:
     print("matrixmul_v1 works as expected!!")
 
 
+fn test_matrix(n: Int):
+
+    var A: Matrix = Matrix.random(n, n)
+    var B: Matrix = Matrix.unit(n)
+    print("Matrix A:")
+    print(String(A))
+    print("Matrix B:")
+    print(String(B))
+
 
 fn main() raises:
     test_matmul_v1(10)
+    test_matrix(5)
