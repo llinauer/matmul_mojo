@@ -23,7 +23,16 @@ fn test_matrix(n: Int):
     print("Matrix B:")
     print(String(B))
 
+fn test_matmul_v2(n: Int) raises:
+    
+    var A: Matrix = Matrix.random(n, n)
+    var B: Matrix = Matrix.unit(n)
+    if A@B == A:
+        print("matrixmul_v2 works as expected!!")
+    
+
 
 fn main() raises:
     test_matmul_v1(10)
     test_matrix(5)
+    test_matmul_v2(10)
