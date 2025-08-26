@@ -19,6 +19,35 @@ struct Matrix(Copyable, Movable, Stringable):
                 str += "\n"
         return str
 
+    fn __getitem__(self, row: Int, col: Int) -> Float32:
+        return self.data[row][col]
+
+    fn __setitem__(mut self, row: Int, col: Int, value: Float32):
+        self.data[row][col] = value
+
+    fn __matmul__(self, other: Matrix) raises -> Self:
+        # check shapes
+        if self.cols != other.rows:
+            raise Error("Cannot multiply matrices with shape ({self.rows},{self.cols}) and ({other.rows},{other.cols})")
+
+        var C: Matrix = Matrix.zero(self.rows, other.cols)
+
+        for j in range(self.cols):
+            for i in range(self.cols):
+                for k in range(self.rows):
+                    C[i, j] += self[i, k]*other[k, j]
+        return C
+
+    fn __eq__(self, other: Matrix) -> Bool:
+        if self.rows != other.rows or self.cols != other.cols:
+            return False
+        
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if self[i, j] != other[i, j]:
+                    return False
+        return True
+
 
     @staticmethod
     fn random(rows: Int, cols: Int) -> Self:
@@ -44,3 +73,12 @@ struct Matrix(Copyable, Movable, Stringable):
             row_data[i] = 1.
             data.append(row_data)
         return Self(n, n, data)
+
+    @staticmethod
+    fn zero(rows: Int, cols: Int) -> Self:
+
+        var data: List[List[Float32]] = []
+        for _ in range(rows):
+            var row_data: List[Float32] = List[Float32](length=cols, fill=0.)
+            data.append(row_data)
+        return Self(rows, cols, data)
