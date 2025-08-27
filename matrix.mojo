@@ -1,5 +1,8 @@
 import random
 from buffer import NDBuffer
+from sys import simdwidthof
+
+alias VEC_WIDTH = simdwidthof[Float32]()
 
 @fieldwise_init
 struct Matrix_v1(Copyable, Movable, Stringable):
@@ -164,20 +167,69 @@ struct Matrix_v2(Copyable, Movable, Stringable):
             k += 1
         return s
 
-    fn matmul(self, B: Matrix_v2) raises -> Matrix_v2:
+    fn matmul(self, other: Matrix_v2) raises -> Matrix_v2:
 
-        if self.cols != B.rows:
-            raise Error("Cannot multiply matrices with shape ({self.rows},{self.cols}) and ({B.rows},{B.cols})")
+        if self.cols != other.rows:
+            raise Error("Cannot multiply matrices with shape ({self.rows},{self.cols}) and ({other.rows},{other.cols})")
         var M: Int = self.rows
         var K: Int = self.cols
-        var N: Int = B.cols
+        var N: Int = other.cols
 
-        var BT = Matrix_v2(B.cols, B.rows)   
-        Self.transpose_into(B, BT)
+        var other_T = Matrix_v2(other.cols, other.rows)   
+        Self.transpose_into(other, other_T)
 
         var C: Matrix_v2 = Matrix_v2.zero(M, N)
 
         for i in range(M):
             for j in range(N):
-                C[i, j] = Self.dot_scalar(self.data, i * self.cols, BT.data, j * BT.cols, K)
+                C[i, j] = Self.dot_scalar(self.data, i * self.cols, other_T.data, j * other_T.cols, K)
+        return C
+
+
+    @staticmethod
+    fn dot_simd(a: List[Float32], a_off: Int,
+                b: List[Float32], b_off: Int,
+                K: Int) -> Float32:
+
+        var a_ptr: UnsafePointer[Float32] = a.unsafe_ptr()
+        var b_ptr: UnsafePointer[Float32] = b.unsafe_ptr()
+
+        var acc: SIMD[DType.float32, VEC_WIDTH] = SIMD[DType.float32, VEC_WIDTH]()
+
+        var k: Int = 0
+        
+        while k + VEC_WIDTH <= K:
+            var va: SIMD[DType.float32, VEC_WIDTH] = a_ptr.load[width=VEC_WIDTH](a_off + k)
+            var vb: SIMD[DType.float32, VEC_WIDTH] = b_ptr.load[width=VEC_WIDTH](b_off + k)
+            acc += va * vb
+            k += VEC_WIDTH
+
+        var sum: Float32 = Float32(acc.reduce_add())
+
+        while k < K:
+            sum += a[a_off + k] * b[b_off + k]
+            k += 1
+
+        return sum
+
+    fn __matmul__(self, other: Matrix_v2) raises -> Matrix_v2:
+        if self.cols != other.rows:
+            raise Error(
+                "Cannot multiply matrices with shape ({self.rows},{self.cols}) and ({other.rows},{other.cols})"
+            )
+
+        var M: Int = self.rows
+        var K: Int = self.cols
+        var N: Int = other.cols
+
+        var other_T = Matrix_v2(other.cols, other.rows)
+        Matrix_v2.transpose_into(other, other_T)
+
+        var C = Matrix_v2.zero(M, N)
+
+        for i in range(M):
+            for j in range(N):
+                C.data[i * C.cols + j] = Matrix_v2.dot_simd(self.data, i * self.cols,
+                                                             other_T.data, j * other_T.cols,
+                                                             K)
         return C
