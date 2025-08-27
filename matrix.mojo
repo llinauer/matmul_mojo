@@ -133,3 +133,43 @@ struct Matrix_v2(Copyable, Movable, Stringable):
     @staticmethod
     fn zero(rows: Int, cols: Int) -> Self:
         return Self(rows, cols)
+
+
+    @staticmethod
+    fn transpose_into(read B: Matrix_v2, mut BT: Matrix_v2) raises:
+        if BT.rows != B.cols or BT.cols != B.rows:
+            raise Error("transpose_into: BT must have shape ({B.cols},{B.rows})")
+
+        for row in range(B.rows):
+            for col in range(B.cols):
+                BT.data[col * BT.cols + row] = B.data[row * B.cols + col]
+
+    @staticmethod
+    fn dot_scalar(a: List[Float32], a_off: Int,
+                b: List[Float32], b_off: Int,
+                K: Int) -> Float32:
+        var s: Float32 = 0.0
+        var k: Int = 0
+        while k < K:
+            s += a[a_off + k] * b[b_off + k]
+            k += 1
+        return s
+
+    @staticmethod
+    fn matmul(A: Matrix_v2, B: Matrix_v2) raises -> Matrix_v2:
+
+        if A.cols != B.rows:
+            raise Error("Cannot multiply matrices with shape ({A.rows},{A.cols}) and ({B.rows},{B.cols})")
+        var M: Int = A.rows
+        var K: Int = A.cols
+        var N: Int = B.cols
+
+        var BT = Matrix_v2(B.cols, B.rows)   
+        Self.transpose_into(B, BT)
+
+        var C: Matrix_v2 = Matrix_v2.zero(M, N)
+
+        for i in range(M):
+            for j in range(N):
+                C[i, j] = Self.dot_scalar(A.data, i * A.cols, BT.data, j * BT.cols, K)
+        return C
