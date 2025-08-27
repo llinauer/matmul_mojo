@@ -1,4 +1,5 @@
 import random
+from buffer import NDBuffer
 
 @fieldwise_init
 struct Matrix_v1(Copyable, Movable, Stringable):
@@ -85,7 +86,50 @@ struct Matrix_v1(Copyable, Movable, Stringable):
 
 
 @fieldwise_init
-struct Matrix(Copyable, Movable, Stringable):
+struct Matrix_v2(Copyable, Movable, Stringable):
     var rows: Int
     var cols: Int
-    var data: List[List[Float32]]
+    var data: List[Float32]
+    
+    fn __init__(out self, rows: Int, cols: Int):
+        self.rows = rows
+        self.cols = cols
+        self.data = List[Float32](length=rows * cols, fill=0.0)
+
+    fn __getitem__(self, row: Int, col: Int) -> Float32:
+        return self.data[row * self.cols + col]
+
+    fn __setitem__(mut self, row: Int, col: Int, val: Float32):
+        self.data[row * self.cols + col] = val
+
+
+    fn __str__(self) -> String:
+        str = String()
+
+        for row in range(self.rows):
+            for col in range(self.cols):
+                str = str + String(self[row, col])
+                if col != self.cols - 1:
+                    str += ", "
+            if row != self.rows - 1:
+                str += "\n"
+        return str
+
+    @staticmethod
+    fn random(rows: Int, cols: Int) -> Self:
+        random.seed()
+        var M = Self(rows, cols)
+        for i in range(rows * cols):
+            M.data[i] = Float32(random.random_float64(0.0, 1.0))
+        return M
+
+    @staticmethod
+    fn unit(n: Int) -> Self:
+        var M = Self(n, n)
+        for i in range(n):
+            M.data[i*n + i] = 1.0
+        return M
+
+    @staticmethod
+    fn zero(rows: Int, cols: Int) -> Self:
+        return Self(rows, cols)
