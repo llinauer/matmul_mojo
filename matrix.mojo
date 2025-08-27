@@ -1,7 +1,7 @@
 import random
 
 @fieldwise_init
-struct Matrix(Copyable, Movable, Stringable):
+struct Matrix_v1(Copyable, Movable, Stringable):
     var rows: Int
     var cols: Int
     var data: List[List[Float32]]
@@ -25,12 +25,12 @@ struct Matrix(Copyable, Movable, Stringable):
     fn __setitem__(mut self, row: Int, col: Int, value: Float32):
         self.data[row][col] = value
 
-    fn __matmul__(self, other: Matrix) raises -> Self:
+    fn __matmul__(self, other: Matrix_v1) raises -> Self:
         # check shapes
         if self.cols != other.rows:
             raise Error("Cannot multiply matrices with shape ({self.rows},{self.cols}) and ({other.rows},{other.cols})")
 
-        var C: Matrix = Matrix.zero(self.rows, other.cols)
+        var C: Matrix_v1 = Matrix_v1.zero(self.rows, other.cols)
 
         for j in range(self.cols):
             for i in range(self.cols):
@@ -38,7 +38,7 @@ struct Matrix(Copyable, Movable, Stringable):
                     C[i, j] += self[i, k]*other[k, j]
         return C
 
-    fn __eq__(self, other: Matrix) -> Bool:
+    fn __eq__(self, other: Matrix_v1) -> Bool:
         if self.rows != other.rows or self.cols != other.cols:
             return False
         
@@ -82,3 +82,10 @@ struct Matrix(Copyable, Movable, Stringable):
             var row_data: List[Float32] = List[Float32](length=cols, fill=0.)
             data.append(row_data)
         return Self(rows, cols, data)
+
+
+@fieldwise_init
+struct Matrix(Copyable, Movable, Stringable):
+    var rows: Int
+    var cols: Int
+    var data: List[List[Float32]]

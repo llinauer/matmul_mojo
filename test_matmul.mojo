@@ -1,5 +1,5 @@
 from matmul import matmul_v1, init_random_matrix, init_unit_matrix
-from matrix import Matrix
+from matrix import Matrix_v1
 
 fn test_matmul_v1(n: Int) raises:
     
@@ -16,17 +16,17 @@ fn test_matmul_v1(n: Int) raises:
 
 fn test_matrix(n: Int):
 
-    var A: Matrix = Matrix.random(n, n)
-    var B: Matrix = Matrix.unit(n)
-    print("Matrix A:")
+    var A: Matrix_v1 = Matrix_v1.random(n, n)
+    var B: Matrix_v1 = Matrix_v1.unit(n)
+    print("Matrix_v1 A:")
     print(String(A))
-    print("Matrix B:")
+    print("Matrix_v1 B:")
     print(String(B))
 
 fn test_matmul_v2(n: Int) raises:
     
-    var A: Matrix = Matrix.random(n, n)
-    var B: Matrix = Matrix.unit(n)
+    var A: Matrix_v1 = Matrix_v1.random(n, n)
+    var B: Matrix_v1 = Matrix_v1.unit(n)
     if A@B == A:
         print("matrixmul_v2 works as expected!!")
     
