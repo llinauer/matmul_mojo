@@ -115,6 +115,15 @@ struct Matrix_v2(Copyable, Movable, Stringable):
                 str += "\n"
         return str
 
+    fn __eq__(self, other: Matrix_v2) -> Bool:
+        if self.rows != other.rows or self.cols != other.cols:
+            return False
+        
+        for i in range((self.rows * self.cols) - 1):
+            if self.data[i] != other.data[i]:
+                    return False
+        return True
+
     @staticmethod
     fn random(rows: Int, cols: Int) -> Self:
         random.seed()
@@ -155,13 +164,12 @@ struct Matrix_v2(Copyable, Movable, Stringable):
             k += 1
         return s
 
-    @staticmethod
-    fn matmul(A: Matrix_v2, B: Matrix_v2) raises -> Matrix_v2:
+    fn matmul(self, B: Matrix_v2) raises -> Matrix_v2:
 
-        if A.cols != B.rows:
-            raise Error("Cannot multiply matrices with shape ({A.rows},{A.cols}) and ({B.rows},{B.cols})")
-        var M: Int = A.rows
-        var K: Int = A.cols
+        if self.cols != B.rows:
+            raise Error("Cannot multiply matrices with shape ({self.rows},{self.cols}) and ({B.rows},{B.cols})")
+        var M: Int = self.rows
+        var K: Int = self.cols
         var N: Int = B.cols
 
         var BT = Matrix_v2(B.cols, B.rows)   
@@ -171,5 +179,5 @@ struct Matrix_v2(Copyable, Movable, Stringable):
 
         for i in range(M):
             for j in range(N):
-                C[i, j] = Self.dot_scalar(A.data, i * A.cols, BT.data, j * BT.cols, K)
+                C[i, j] = Self.dot_scalar(self.data, i * self.cols, BT.data, j * BT.cols, K)
         return C
