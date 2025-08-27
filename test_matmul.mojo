@@ -45,6 +45,13 @@ fn test_matrix_v2(n: Int):
     print("\nMatrix_v2 C:")
     print(String(C))
 
+
+fn test_matmul_v3(n: Int) raises:
+    
+    var A: Matrix_v2 = Matrix_v2.random(n, n)
+    var B: Matrix_v2 = Matrix_v2.unit(n)
+    if A.matmul(B) == A:
+        print("\nmatmul_v3 works as expected!!")
     
 
 
@@ -53,4 +60,5 @@ fn main() raises:
     test_matrix_v1(5)
     test_matmul_v2(10)
     test_matrix_v2(4)
+    test_matmul_v3(10)
 
