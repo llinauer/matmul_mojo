@@ -49,4 +49,4 @@ def main():
     plt.title("Matrix Multiplication Benchmark") 
     plt.legend() 
     plt.grid(True)
-    plt.show(bbox_inches="tight")
+    plt.show()
